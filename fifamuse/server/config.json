@@ -1,0 +1,9 @@
+{
+  "rds_host": "NEEDED",
+  "rds_port": "NEEDED",
+  "rds_user": "NEEDED",
+  "rds_password" : "NEEDED",
+  "rds_db": "NEEDED",
+  "server_host": "localhost",
+  "server_port":"8080"
+}
