@@ -1,0 +1,57 @@
+Query 1: players with attendance > attendance ratio across all their club games 
+
+
+        SELECT full_name, appearances_overall, a.Team_Apperances, appearances_overall / a.Team_Apperances as ratio
+        FROM players p join (SELECT t.common_name, COUNT(*) AS Team_Apperances
+        FROM teams t join (
+            SELECT home_team_name FROM matches
+                union all
+            SELECT away_team_name FROM matches) m
+            on t.common_name = m.home_team_name
+        group by t.common_name) a on p.`Current Club` = a.common_name
+        WHERE (appearances_overall / a.Team_Apperances) >= 0.75;
+
+Query 2: clubs with more than x% win ratio (name, club ,club ratio)
+
+
+        SELECT a.common_name, tw.wins / a.Team_Apperances AS Win_Ratio
+        FROM (SELECT t.common_name, COUNT(*) AS Team_Apperances
+        FROM teams t join (
+            SELECT home_team_name FROM matches
+                union all
+            SELECT away_team_name FROM matches) m
+            on t.common_name = m.home_team_name
+        group by t.common_name) a JOIN (
+        SELECT t.common_name, COUNT(*) AS wins
+        FROM teams t JOIN ((SELECT home_team_name
+        FROM matches
+        WHERE home_team_goal_count > away_team_goal_count) UNION ALL
+        (SELECT away_team_name
+        FROM matches
+        WHERE away_team_goal_count > home_team_goal_count)) w on t.common_name = w.home_team_name
+        GROUP BY t.common_name) tw on a.common_name = tw.common_name
+        WHERE tw.wins / a.Team_Apperances >= 0.55;
+
+
+Query 3: players with more than x% goal match ratio in national and international leagues 
+
+        SELECT p.full_name, tg.common_name, p.goals_overall / tg.Goals AS goal_ratio
+        FROM players p join (SELECT t.common_name, SUM(goals) AS Goals FROM teams t JOIN ((SELECT home_team_name, SUM(home_team_goal_count) AS goals
+        FROM matches
+        WHERE home_team_goal_count
+        GROUP BY home_team_name) UNION ALL
+        (SELECT away_team_name, SUM(away_team_goal_count) AS goals
+        FROM matches
+        WHERE away_team_goal_count
+        GROUP BY away_team_name)) g on t.common_name = g.home_team_name group by t.common_name) tg on p.`Current Club` = tg.common_name
+        WHERE p.goals_overall / tg.Goals >= 0.2
+
+Query 4: countries with most activity (number of matches that the countries clubs + national team have)
+
+        SELECT t.country, count(*) activity
+        FROM (SELECT common_name, country FROM teams ) t join (
+            SELECT home_team_name FROM matches
+                union all
+            SELECT away_team_name FROM matches) m on t.common_name = m.home_team_name
+        GROUP BY t.country
+        ORDER BY activity desc;
