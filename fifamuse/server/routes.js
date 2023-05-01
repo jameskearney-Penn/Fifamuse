@@ -132,5 +132,5 @@ AND p.player_name LIKE '%${name}%' AND pns.league_name LIKE '%${league}%'
 
 
 module.exports = {
-
+    players_of_week,
 }

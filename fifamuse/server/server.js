@@ -8,9 +8,7 @@ app.use(cors({
     origin: '*',
 }));
 
-
-
-
+app.get('/players_of_week', routes.players_of_week);
 
 app.listen(config.server_port, () => {
     console.log(`Server running at http://${config.server_host}:${config.server_port}/`)
