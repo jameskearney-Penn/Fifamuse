@@ -205,7 +205,7 @@ export default function ClubsPage() {
         <Grid item xs={6}>
           <p>Goal Difference</p>
           <Slider
-            value={goals}
+            value={goal_difference}
             min={-45}
             max={53}
             step={2}
@@ -216,7 +216,7 @@ export default function ClubsPage() {
         <Grid item xs={6}>
           <p>Cards</p>
           <Slider
-            value={goals}
+            value={cards}
             min={0}
             max={124}
             step={4}
@@ -227,7 +227,7 @@ export default function ClubsPage() {
         <Grid item xs={6}>
           <p>Shots</p>
           <Slider
-            value={goals}
+            value={shots}
             min={6}
             max={576}
             step={1}
