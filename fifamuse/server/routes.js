@@ -43,13 +43,39 @@ const teams_of_week = async function(res, req) {
 }
 
 const get_player = async function(res, req) {
+    let name = req.params.name;
+
     connection.query(`
-    SELECT name, player_positions, rating, value_eur, wage_eur, age, dob, height_cm, 
-    `)
+    SELECT name, position, rating, value_eur, wage_eur, age, dob, height_cm, weight_cm, club_name, league_name, club_jersey_number, nationality, club_logo_url, nation_flag_url
+    FROM Player
+    WHERE name = '%${name}%'
+    LIMIT 1
+    `, (err, data) => {
+        if (err || data.length === 0) {
+            console.log(err);
+            res.json({});
+        } else {
+            res.json(data[0]);
+        }
+    });
 }
 
 const get_team = async function(res, req) {
+    let name = req.params.name;
 
+    connection.query(`
+    SELECT c.common_name, cl.league_name c.country, c.club_logo, c.club_flag, c.matches_played, c.wins, c.draws, c.losses, c.goals_scored, c.goals_conceded, c.goals_difference, c,cards_total, c.shots, c.shots_on_target
+    FROM Club c JOIN Club_Plays_In cl on c.common_name = cl.club_name
+    WHERE common_name = '%${name}%'
+    LIMIT 1
+    `, (err, data) => {
+        if (err || data.length === 0) {
+            console.log(err);
+            res.json({});
+        } else {
+            res.json(data[0]);
+        }
+    });
 }
 
 const search_clubs = async function(req, res) {
