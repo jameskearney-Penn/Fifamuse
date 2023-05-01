@@ -43,13 +43,39 @@ const teams_of_week = async function(res, req) {
 }
 
 const search_clubs = async function(req, res) {
-    const draws = req.query.draws ?? 0;
-    const losses = req.query.losses ?? 0;
-    const wins = req.query.wins ?? 0;
-    const goals_conceded = req.query.
+    const draws_min = req.query.draws_min ?? 0;
+    const draws_max = req.query.draws_max ?? 50;
+    const losses_min = req.query.losses_min ?? 0;
+    const losses_max = req.query.losses_max ?? 50;
+    const wins_min = req.query.wins_min ?? 0;
+    const wins_max = req.query.wins_max ?? 50;
+    const goals_conceded_min = req.query.goals_c_min ?? 0;
+    const goals_conceded_max = req.query.goals_c_max ?? 100;
+    const goal_diff_min = req.query.goal_d_min ?? -50;
+    const goal_diff_max = req.query.goal_d_max ?? 50;
+    const cards_min = req.query.cards_min ?? 0;
+    const cards_max = req.query.cards_max ?? 120;
+    const shots_min = req.query.shots_min ?? 0;
+    const shots_max = req.query.shots_max ?? 600;
+    const shots_tgt_min = req.query.shots_tgt_min ?? 0;
+    const shots_tgt_max = req.query.shots_tgt_max ?? 600;
+    const matches_played_min = req.query.matches_min ?? 10;
+    const matches_played_max = req.query.matches_max ?? 70;
+    const win_ratio_min = req.query.win_rat_min ?? 0;
+    const win_ratio_max = req.query.win_rat_max ?? 1;
+    const name = req.query.name ?? '';
+    const league = req.query.league ?? '';
+    const country = req.query.country ?? '';
 
     connection.query(`
-        
+        SELECT c.common_name, cl.league_name, c.country
+        FROM Club c JOIN Club_Plays_In cl ON c.common_name = cl.club_name
+        WHERE c.common_name LIKE '%${name}%' AND cl.league_name LIKE '%${league}%' AND c.country LIKE '%${country}%'
+        AND c.wins >= ${wins_min} AND c.wins <= ${wins_max} AND c.draws >= ${draws_min} AND c.draws <= ${draws_max} AND c.losses >= ${losses_min} AND c.losses <= ${losses_max}
+        AND c.goals_conceded >= ${goals_conceded_min} AND c.goals_conceded <= ${goals_conceded_max} AND c.goal_difference >= ${goal_diff_min} AND c.goal_difference <= ${goal_diff_max}
+        AND c.cards_total >= ${cards_min} AND c.cards_total <=${cards_max} AND c.shots >= ${shots_min} AND c.shots <= ${shots_max} 
+        AND c.shots_on_target >= ${shots_tgt_min} AND c.shots_on_target <= ${shots_tgt_max} AND c.matches_played >= ${matches_played_min} AND c.matches_played <= ${matches_played_max}
+        AND c.wins / c.matches_played
     `)
 }
 const search_players = async function(req, res) {
