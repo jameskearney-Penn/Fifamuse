@@ -8,9 +8,12 @@ app.use(cors({
     origin: '*',
 }));
 
-
-
-
+app.get('/player_of_week', routes.players_of_week);
+app.get('/search_players', routes.search_players);
+app.get('/team_of_week', routes.teams_of_week);
+app.get('/search_clubs', routes.search_clubs);
+app.get('/player/:id', routes.get_player);
+app.get('/club/:name', routes.get_team);
 
 app.listen(config.server_port, () => {
     console.log(`Server running at http://${config.server_host}:${config.server_port}/`)

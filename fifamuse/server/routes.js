@@ -42,6 +42,16 @@ const teams_of_week = async function(res, req) {
     });
 }
 
+const get_player = async function(res, req) {
+    connection.query(`
+    SELECT name, player_positions, rating, value_eur, wage_eur, age, dob, height_cm, 
+    `)
+}
+
+const get_team = async function(res, req) {
+
+}
+
 const search_clubs = async function(req, res) {
     const draws_min = req.query.draws_min ?? 0;
     const draws_max = req.query.draws_max ?? 50;
@@ -75,8 +85,15 @@ const search_clubs = async function(req, res) {
         AND c.goals_conceded >= ${goals_conceded_min} AND c.goals_conceded <= ${goals_conceded_max} AND c.goal_difference >= ${goal_diff_min} AND c.goal_difference <= ${goal_diff_max}
         AND c.cards_total >= ${cards_min} AND c.cards_total <=${cards_max} AND c.shots >= ${shots_min} AND c.shots <= ${shots_max} 
         AND c.shots_on_target >= ${shots_tgt_min} AND c.shots_on_target <= ${shots_tgt_max} AND c.matches_played >= ${matches_played_min} AND c.matches_played <= ${matches_played_max}
-        AND c.wins / c.matches_played
-    `)
+        AND c.wins / c.matches_played >= ${win_ratio_min} AND c.wins / c.matches_played <= ${win_ratio_max}
+    `, (err, data) => {
+        if (err || data.length ===0) {
+            console.log(err);
+            res.json();
+        } else {
+            res.json(data);
+        }
+    });
 }
 const search_players = async function(req, res) {
     const name = req.query.name ?? '';
@@ -132,5 +149,10 @@ AND p.player_name LIKE '%${name}%' AND pns.league_name LIKE '%${league}%'
 
 
 module.exports = {
-
+    players_of_week,
+    teams_of_week,
+    search_clubs,
+    search_players,
+    get_player,
+    get_team
 }
