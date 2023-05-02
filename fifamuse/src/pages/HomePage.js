@@ -3,7 +3,6 @@ import { Container, Divider, Link } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 
 import LazyTable from '../components/LazyTable';
-import SongCard from '../components/SongCard';
 const config = require('../config.json');
 
 export default function HomePage() {
@@ -17,76 +16,55 @@ export default function HomePage() {
   // changes from the previous render. In this case, an empty array means the callback
   // will only run on the very first render.
   useEffect(() => {
-    // Fetch request to get the song of the day. Fetch runs asynchronously.
-    // The .then() method is called when the fetch request is complete
-    // and proceeds to convert the result to a JSON which is finally placed in state.
-    fetch(`http://${config.server_host}:${config.server_port}/random`)
+    fetch(`http://${config.server_host}:${config.server_port}/player_of_week`)
       .then(res => res.json())
-      .then(resJson => setPlayerOfTheDay(resJson));
+      .then(resJson => {setPlayerOfTheDay(resJson[0])});
   }, []);
-
-  /*['long_name',
-  'player_positions',
-  'value_eur',
-  'overall',
-  'wage_eur',
-  'age',
-  'dob',
-  'height_cm',
-  'weight_kg',
-  'club_name',
-  'league_name',
-  'club_jersey_number',
-  'nation_jersey_number',
-  'nationality_name',
-  'player_face_url',
-  'club_logo_url',
-  'club_flag_url',
-  'nation_logo_url',
-  'nation_flag_url']*/
 
   const playerColumns = [
     {
-      field: 'long_name',
+      field: 'name',
       headerName: 'Name',
-      renderCell: (row) => <Link onClick={() => setSelectedPlayer(row.sofifa_id)}>{row.long_name}</Link>
     },
     {
-      field: 'common_club_name',
+      field: 'club_name',
       headerName: 'Club',
-      renderCell: (row) => <NavLink to={`/albums/${row.common_club_name}`}>{row.common_club_name}</NavLink> // A NavLink component is used to create a link to the album page
     },
     {
-      field: 'player_positions',
-      headerName: 'Player Positions'
+      field: 'age',
+      headerName: 'Age',
+    },
+    {
+      field: 'league_name',
+      headerName: 'League'
     },
   ];
 
   const albumColumns = [
     {
-      field: 'title',
-      headerName: 'Album Title',
-      renderCell: (row) => <NavLink to={`/albums/${row.album_id}`}>{row.title}</NavLink> 
+      field: 'club_name',
+      headerName: 'Name',
     },
     {
-      field: 'plays',
-      headerName: 'Plays',
+      field: 'league_name',
+      headerName: 'League Name',
     },
   ]
 
   return (
     <Container>
       <div style={{width: "100%", alignContent: "center", justifyContent: "center"}}><h1 style={{alignSelf: "center", paddingLeft: "35%"}}>Welcome to FifaMuse!</h1></div>
-      <h2>Check out the player of the day:&nbsp;
-        <Link></Link>
+      <h2>Check out the player of the day:
+        <h5>{playerOfTheDay.name}</h5>
+        <h5>{playerOfTheDay.club_name}</h5>
       </h2>
       <Divider />
       <h2>Spotlight Players Of The Week</h2>
-      <LazyTable route={`http://${config.server_host}:${config.server_port}/top_players`} columns={playerColumns} />
+      <LazyTable route={`http://${config.server_host}:${config.server_port}/players_of_week`} columns={playerColumns} />
       <Divider />
       <Divider />
       <h2>Spotlight Clubs Of The Week</h2>
-      <LazyTable route={`http://${config.server_host}:${config.server_port}/top_clubs`} columns={albumColumns} defaultPageSize={5} rowsPerPageOptions={[5, 10]}/>
+      <LazyTable route={`http://${config.server_host}:${config.server_port}/teams_of_week`} columns={albumColumns} defaultPageSize={5} rowsPerPageOptions={[5, 10]}/>
       <Divider />
     </Container>
   );

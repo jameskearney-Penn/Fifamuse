@@ -12,12 +12,28 @@ const connection = mysql.createConnection({
 });
 connection.connect((err) => err && console.log(err));
 
+const player_of_week = async function(req, res) {
+    connection.query(`
+    SELECT name, age, club_name, league_name, nationality
+    FROM Player
+    ORDER BY RAND()
+    LIMIT 1
+    `, (err, data) => {
+        if (err || data.length ===0) {
+            console.log(err);
+            res.json();
+        } else {
+            res.json(data);
+        }
+    });
+}
 
 const players_of_week = async function(req, res) {
     connection.query(`
     SELECT name, age, club_name, league_name, nationality
     FROM Player
     ORDER BY RAND()
+    LIMIT 10
     `, (err, data) => {
         if (err || data.length ===0) {
             console.log(err);
@@ -32,6 +48,7 @@ const teams_of_week = async function(req, res) {
     SELECT club_name, league_name, country
     FROM Club_Plays_In
     ORDER BY RAND()
+    LIMIT 10
     `, (err, data) => {
         if (err || data.length ===0) {
             console.log(err);
@@ -140,6 +157,7 @@ const search_clubs = async function(req, res) {
     });
 }
 const search_players = async function(req, res) {
+    console.log(req.query);
     const name = req.query.name ?? '';
     const club_name = req.query.club ?? '';
     const appearance_ratio_min = req.query.appr_rat_min ?? 0;
@@ -153,7 +171,7 @@ const search_players = async function(req, res) {
     const wage_min = req.query.wage_min ?? '0';
     const wage_max = req.query.wage_max ?? '1000000'
     const goal_ratio_max = req.query.goal_ratio_max ?? '1'
-    const goal_ratio_min = req.query.goal_ratio_max ?? '0'
+    const goal_ratio_min = req.query.goal_ratio_min ?? '0'
 
     connection.query(`
         WITH TEAM_APPEARANCES AS (SELECT t.common_name, COUNT(*) AS Team_Appearances
@@ -180,19 +198,17 @@ AND pns.height_cm >=${height_min} AND pns.age >= ${age_min} AND pns.age <= ${age
 p.goals / tg.Goals >= ${goal_ratio_min} AND p.goals / tg.Goals <= ${goal_ratio_max} AND pns.nationality LIKE '%${nationality}%' 
 AND p.player_name LIKE '%${name}%' AND pns.league_name LIKE '%${league}%'
     `, (err, data) => {
-        if (err || data.length ===0) {
+        if (err || data.length === 0) {
             console.log(err);
-            res.json();
+            res.json({});
         } else {
             res.json(data);
         }
     });
 }
 
-
-
-
 module.exports = {
+    player_of_week,
     players_of_week,
     teams_of_week,
     search_clubs,
