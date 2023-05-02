@@ -78,6 +78,7 @@ const get_team = async function(res, req) {
     });
 }
 
+
 const search_clubs = async function(req, res) {
     const draws_min = req.query.draws_min ?? 0;
     const draws_max = req.query.draws_max ?? 50;
