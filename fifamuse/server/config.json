@@ -1,9 +1,9 @@
 {
-  "rds_host": "NEEDED",
-  "rds_port": "NEEDED",
-  "rds_user": "NEEDED",
-  "rds_password" : "NEEDED",
-  "rds_db": "NEEDED",
+  "rds_host": "project-db.cahe8zlhmve3.us-east-1.rds.amazonaws.com",
+  "rds_port": "3306",
+  "rds_user": "fifamuse",
+  "rds_password" : "fifa4500Muse",
+  "rds_db": "fifamuse",
   "server_host": "localhost",
   "server_port":"8080"
 }

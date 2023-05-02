@@ -13,7 +13,7 @@ const connection = mysql.createConnection({
 connection.connect((err) => err && console.log(err));
 
 
-const players_of_week = async function(res, req) {
+const players_of_week = async function(req, res) {
     connection.query(`
     SELECT name, age, club_name, league_name, nationality
     FROM Player
@@ -27,7 +27,7 @@ const players_of_week = async function(res, req) {
         }
     });
 }
-const teams_of_week = async function(res, req) {
+const teams_of_week = async function(req, res) {
     connection.query(`
     SELECT club_name, league_name, country
     FROM Club_Plays_In
@@ -42,13 +42,14 @@ const teams_of_week = async function(res, req) {
     });
 }
 
-const get_player = async function(res, req) {
+const get_player = async function(req, res) {
     let name = req.params.name;
+    console.log(name);
 
     connection.query(`
-    SELECT name, position, rating, value_eur, wage_eur, age, dob, height_cm, weight_cm, club_name, league_name, club_jersey_number, nationality, club_logo_url, nation_flag_url
+    SELECT name, position, rating, value_eur, wage_eur, age, dob, height_cm, weight_kg, club_name, league_name, club_jersey_number, nationality, club_logo_url, nation_flag_url
     FROM Player
-    WHERE name = '%${name}%'
+    WHERE name LIKE '%${name}%'
     LIMIT 1
     `, (err, data) => {
         if (err || data.length === 0) {
@@ -60,13 +61,14 @@ const get_player = async function(res, req) {
     });
 }
 
-const get_team = async function(res, req) {
+const get_team = async function(req, res) {
     let name = req.params.name;
 
     connection.query(`
-    SELECT c.common_name, cl.league_name c.country, c.club_logo, c.club_flag, c.matches_played, c.wins, c.draws, c.losses, c.goals_scored, c.goals_conceded, c.goals_difference, c,cards_total, c.shots, c.shots_on_target
+    SELECT c.common_name, cl.league_name, c.country, c.club_logo, c.club_flag, c.matches_played, c.wins, c.draws, 
+    c.losses, c.goals_scored, c.goals_conceded, c.goal_difference, c.cards_total, c.shots, c.shots_on_target
     FROM Club c JOIN Club_Plays_In cl on c.common_name = cl.club_name
-    WHERE common_name = '%${name}%'
+    WHERE common_name LIKE '%${name}%'
     LIMIT 1
     `, (err, data) => {
         if (err || data.length === 0) {
@@ -125,25 +127,25 @@ const search_clubs = async function(req, res) {
 const search_players = async function(req, res) {
     const name = req.query.name ?? '';
     const club_name = req.query.club ?? '';
-    const appearance_ratio_min = req.query.appr_rat ?? 0;
-    const appearance_ratio_max = req.query.appr_rat ?? 1;
+    const appearance_ratio_min = req.query.appr_rat_min ?? 0;
+    const appearance_ratio_max = req.query.appr_rat_max ?? 1;
     const league = req.query.league ?? '';
     const age_min = req.query.age_min ?? 0;
     const age_max = req.query.age_max ?? 100;
     const nationality = req.query.nationality ?? '';
     const height_min = req.query.height_min ?? '0';
-    const height_max = req.query.height_max ?? '200';
+    const height_max = req.query.height_max ?? '250';
     const wage_min = req.query.wage_min ?? '0';
     const wage_max = req.query.wage_max ?? '1000000'
     const goal_ratio_max = req.query.goal_ratio_max ?? '1'
-    const goal_ratio_min = req.query.goal_ratio_max ?? '1'
+    const goal_ratio_min = req.query.goal_ratio_max ?? '0'
 
     connection.query(`
         WITH TEAM_APPEARANCES AS (SELECT t.common_name, COUNT(*) AS Team_Appearances
         FROM Club t join (
             SELECT home_team FROM Club_Matches WHERE home_team LIKE '%${club_name}%'
                 union all
-            SELECT away_team FROM matches WHERE away_team LIKE '%${club_name}%'') m
+            SELECT away_team FROM Club_Matches WHERE away_team LIKE '%${club_name}%') m
             on t.common_name = m.home_team
         group by t.common_name),
         TEAMS_GOALS AS (SELECT t.common_name, SUM(goals) AS Goals FROM Club t JOIN ((SELECT home_team, SUM(home_score) AS goals
@@ -154,13 +156,13 @@ const search_players = async function(req, res) {
         FROM Club_Matches
         WHERE away_team LIKE '%${club_name}%'
         GROUP BY away_team)) g on t.common_name = g.home_team group by t.common_name)
-SELECT p.player_name, p.club_common_name, p.appearances / ta.Team_Appearances as appearance_ratio, p.goals_overall / tg.Goals as goal_ratio
+SELECT p.player_name, p.club_common_name, p.appearances / ta.Team_Appearances as appearance_ratio, p.goals / tg.Goals as goal_ratio
 FROM Player_Club_Stats p JOIN TEAM_APPEARANCES ta on p.club_common_name = ta.common_name JOIN TEAMS_GOALS tg on ta.common_name = tg.common_name JOIN Player pns 
 on p.player_id = pns.id
 WHERE p.appearances / ta.Team_Appearances >= ${appearance_ratio_min} AND p.appearances / ta.Team_Appearances <= ${appearance_ratio_max} 
-AND p.goals_overall / tg.Goals >= ${appearance_ratio_min} AND p.goals_overall / tg.Goals <= ${appearance_ratio_max} AND pns.height_cm <= ${height_max} 
+AND pns.height_cm <= ${height_max} 
 AND pns.height_cm >=${height_min} AND pns.age >= ${age_min} AND pns.age <= ${age_max} AND pns.wage_eur >= ${wage_min} AND pns.wage_eur <=${wage_max} AND 
-p.goals_overall / tg.Goals >= ${goal_ratio_min} AND p.goals_overall / tg.Goals <= ${goal_ratio_max} AND p.nationality LIKE '%${nationality}%' 
+p.goals / tg.Goals >= ${goal_ratio_min} AND p.goals / tg.Goals <= ${goal_ratio_max} AND pns.nationality LIKE '%${nationality}%' 
 AND p.player_name LIKE '%${name}%' AND pns.league_name LIKE '%${league}%'
     `, (err, data) => {
         if (err || data.length ===0) {
