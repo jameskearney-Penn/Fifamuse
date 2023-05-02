@@ -12,8 +12,7 @@ export default function ClubsPage() {
   const [currCountry, setCurrCountry] = useState('');
   const [currLeague, setCurrLeague] = useState('');
   const [matches_played, setMatchesPlayed] = useState([1, 40]);
-  const [matches_played_home, setHomeMatches] = useState([0, 20]);
-  const [matches_played_away, setAwayMatches] = useState([0, 20]);
+  const [winRatio, setWinRatio] = useState([0, 1]);
   const [wins, setWins] = useState([0, 24]);
   const [winsHome, setWinsHome] = useState([0, 14]);
   const [winsAway, setWinsAway] = useState([0, 12]);
@@ -26,31 +25,30 @@ export default function ClubsPage() {
   const [shots, setShots] = useState([6, 576]);
   const [shots_on_target, setShotsOnTarget] = useState([3, 242]);
 
-  useEffect(() => {
-    fetch(`http://${config.server_host}:${config.server_port}/search_players`)
-      .then(res => res.json())
-      .then(resJson => {
-        const songsWithId = resJson.map((song) => ({ id: song.song_id, ...song }));
-        setData(songsWithId);
-      });
-  }, []);
-
   const search = () => {
-    /*fetch(`http://${config.server_host}:${config.server_port}/search_songs?title=${title}` +
-      `&duration_low=${duration[0]}&duration_high=${duration[1]}` +
-      `&plays_low=${plays[0]}&plays_high=${plays[1]}` +
-      `&danceability_low=${danceability[0]}&danceability_high=${danceability[1]}` +
-      `&energy_low=${energy[0]}&energy_high=${energy[1]}` +
-      `&valence_low=${valence[0]}&valence_high=${valence[1]}` +
-      `&explicit=${explicit}`
-    )
-      .then(res => res.json())
+    fetch(`http://${config.server_host}:${config.server_port}/search_clubs?` + `name=${currName}` +
+    `&country=${currCountry}` + `&league=${currLeague}` +
+    `&draws_min=${draws[0]}` + `&draws_max=${draws[1]}` +
+    `&losses_min=${losses[0]}` + `&losses_max=${losses[1]}` +
+    `&wins_min=${wins[0]}` + `&wins_max=${wins[1]}` +
+    `&goals_c_min=${goals_conceded[0]}` + `&goals_c_max=${goals_conceded[1]}` +
+    `&goal_d_min=${goal_difference[0]}` + `&goal_d_max=${goal_difference[1]}` +
+    `&shots_min=${shots[0]}` + `&shots_max=${wins[1]}` +
+    `&shots_tgt_min=${shots_on_target[0]}` + `&shots_tgt_max=${shots_on_target[1]}` +
+    `&matches_min=${matches_played[0]}` + `&matches_max=${matches_played[1]}` +
+    `&win_rat_min=${winRatio[0]}` + `&win_rat_max=${winRatio[1]}`
+    ).then(res => res.json())
       .then(resJson => {
         // DataGrid expects an array of objects with a unique id.
         // To accomplish this, we use a map with spread syntax (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax)
-        const songsWithId = resJson.map((song) => ({ id: song.song_id, ...song }));
-        setData(songsWithId);
-      });*/
+        console.log(resJson);
+        if (resJson.length && resJson.length != 0) {
+          const songsWithId = resJson.map((player) => ({ id:  Math.random(), ...player }));
+          setData(songsWithId);
+        } else {
+          setData({})
+        }
+      });
   }
 
   // This defines the columns of the table of songs used by the DataGrid component.
@@ -58,15 +56,9 @@ export default function ClubsPage() {
   // LazyTable component. The big difference is we provide all data to the DataGrid component
   // instead of loading only the data we need (which is necessary in order to be able to sort by column)
   const columns = [
-    { field: 'common_name', headerName: 'Name', width: 300, renderCell: (params) => (
-        <Link onClick={() => setSelectedClub(params.row.common_name)}>{params.common_name}</Link>
-    ) },
-    { field: 'value_eur', headerName: 'Value (Euros)' },
-    { field: 'wage_eur', headerName: 'Valence' },
-    { field: 'overall', headerName: 'Overall Fifa Ranking' },
-    { field: 'height_cm', headerName: 'Height (cm)' },
-    { field: 'weight_kg', headerName: 'Weight (kg)' },
-    { field: 'age', headerName: 'Age' },
+    { field: 'common_name', headerName: 'Name', width: 150},
+    { field: 'league_name', headerName: 'League', width: 250},
+    { field: 'country', headerName: 'Country' }
   ]
 
   // This component makes uses of the Grid component from MUI (https://mui.com/material-ui/react-grid/).
@@ -105,28 +97,6 @@ export default function ClubsPage() {
           />
         </Grid>
         <Grid item xs={6}>
-          <p>Matches Played Home</p>
-          <Slider
-            value={matches_played_home}
-            min={0}
-            max={20}
-            step={1}
-            onChange={(e, newValue) => setHomeMatches(newValue)}
-            valueLabelDisplay='auto'
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <p>Matches Played Away</p>
-          <Slider
-            value={matches_played_away}
-            min={0}
-            max={20}
-            step={1}
-            onChange={(e, newValue) => setAwayMatches(newValue)}
-            valueLabelDisplay='auto'
-          />
-        </Grid>
-        <Grid item xs={6}>
           <p>Wins</p>
           <Slider
             value={wins}
@@ -138,23 +108,13 @@ export default function ClubsPage() {
           />
         </Grid>
         <Grid item xs={6}>
-          <p>Wins Home</p>
+          <p>Win Ratio</p>
           <Slider
-            value={winsHome}
+            value={winRatio}
             min={0}
-            max={14}
-            step={1}
-            onChange={(e, newValue) => setWinsHome(newValue)}
-            valueLabelDisplay='auto'
-          />
-        </Grid><Grid item xs={6}>
-          <p>Wins</p>
-          <Slider
-            value={winsAway}
-            min={0}
-            max={12}
-            step={1}
-            onChange={(e, newValue) => setWinsAway(newValue)}
+            max={1}
+            step={.1}
+            onChange={(e, newValue) => setWinRatio(newValue)}
             valueLabelDisplay='auto'
           />
         </Grid>
