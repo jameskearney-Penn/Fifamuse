@@ -37,8 +37,12 @@ export default function PlayersPage() {
         // DataGrid expects an array of objects with a unique id.
         // To accomplish this, we use a map with spread syntax (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax)
         console.log(resJson);
-        const songsWithId = resJson.map((player) => ({ id:  Math.random(), ...player }));
-        setData(songsWithId);
+        if (resJson != {}) {
+          const songsWithId = resJson.map((player) => ({ id:  Math.random(), ...player }));
+          setData(songsWithId);
+        } else {
+          setData({})
+        }
       });
   }
 
@@ -87,20 +91,6 @@ export default function PlayersPage() {
             max={350000}
             step={10000}
             onChange={(e, newValue) => setWage(newValue)}
-            valueLabelDisplay='auto'
-            valueLabelFormat={value => <div>{value / 1000000}</div>}
-          />
-        </Grid>
-        {/* TODO (TASK 24): add sliders for danceability, energy, and valence (they should be all in the same row of the Grid) */}
-        {/* Hint: consider what value xs should be to make them fit on the same row. Set max, min, and a reasonable step. Is valueLabelFormat is necessary? */}
-        <Grid item xs={6}>
-          <p>Overall (FIFA23)</p>
-          <Slider
-            value={overall}
-            min={47}
-            max={91}
-            step={3}
-            onChange={(e, newValue) => setOverall(newValue)}
             valueLabelDisplay='auto'
           />
         </Grid>
