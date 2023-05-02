@@ -14,6 +14,7 @@ app.get('/team_of_week', routes.teams_of_week);
 app.get('/search_clubs', routes.search_clubs);
 app.get('/player/:name', routes.get_player);
 app.get('/club/:name', routes.get_team);
+app.get('/country/:name', routes.get_country);
 
 app.listen(config.server_port, () => {
     console.log(`Server running at http://${config.server_host}:${config.server_port}/`)

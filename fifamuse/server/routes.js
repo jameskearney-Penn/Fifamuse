@@ -68,7 +68,7 @@ const get_team = async function(req, res) {
     SELECT c.common_name, cl.league_name, c.country, c.club_logo, c.club_flag, c.matches_played, c.wins, c.draws, 
     c.losses, c.goals_scored, c.goals_conceded, c.goal_difference, c.cards_total, c.shots, c.shots_on_target
     FROM Club c JOIN Club_Plays_In cl on c.common_name = cl.club_name
-    WHERE common_name LIKE '%${name}%'
+    WHERE common_name = '${name}'
     LIMIT 1
     `, (err, data) => {
         if (err || data.length === 0) {
@@ -80,6 +80,21 @@ const get_team = async function(req, res) {
     });
 }
 
+const get_country = async function(req, res) {
+    let name = req.params.name
+    connection.query(`
+        SELECT *
+        FROM Club c JOIN Club_Plays_In cl on c.common_name = cl.club_name
+        WHERE c.country = '${name}'
+    `, (err, data) => {
+        if (err || data.length === 0) {
+            console.log(err);
+            res.json({});
+        } else {
+            res.json(data);
+        }
+    });
+}
 
 const search_clubs = async function(req, res) {
     const draws_min = req.query.draws_min ?? 0;
@@ -183,5 +198,6 @@ module.exports = {
     search_clubs,
     search_players,
     get_player,
-    get_team
+    get_team,
+    get_country
 }
