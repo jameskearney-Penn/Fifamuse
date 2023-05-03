@@ -172,29 +172,28 @@ const search_players = async function(req, res) {
     const goal_ratio_min = req.query.goal_ratio_min ?? '0'
 
     connection.query(`
-        WITH TEAM_APPEARANCES AS (SELECT t.common_name, COUNT(*) AS Team_Appearances
-        FROM Club t join (
-            SELECT home_team FROM Club_Matches WHERE home_team LIKE '%${club_name}%'
-                union all
-            SELECT away_team FROM Club_Matches WHERE away_team LIKE '%${club_name}%') m
-            on t.common_name = m.home_team
-        group by t.common_name),
-        TEAMS_GOALS AS (SELECT t.common_name, SUM(goals) AS Goals FROM Club t JOIN ((SELECT home_team, SUM(home_score) AS goals
-        FROM Club_Matches
-        WHERE home_team LIKE '%${club_name}%'
-        GROUP BY home_team) UNION ALL
-        (SELECT away_team, SUM(away_score) AS goals
-        FROM Club_Matches
-        WHERE away_team LIKE '%${club_name}%'
-        GROUP BY away_team)) g on t.common_name = g.home_team group by t.common_name)
+        WITH TEAM_APPEARANCES AS (
+SELECT t.common_name, COUNT(*) AS Team_Appearances FROM Club t JOIN (
+SELECT home_team FROM Club_Matches UNION ALL SELECT away_team FROM Club_Matches
+) m ON t.common_name = m.home_team
+GROUP BY t.common_name),
+TEAMS_GOALS AS (
+SELECT t.common_name, SUM(goals) AS Goals
+FROM Club t JOIN ((SELECT home_team, SUM(home_score) AS goals
+FROM Club_Matches GROUP BY home_team)
+UNION ALL
+(SELECT away_team, SUM(away_score) AS goals FROM Club_Matches GROUP BY away_team)) g ON t.common_name = g.home_team
+GROUP BY t.common_name)
 SELECT p.player_name, p.club_common_name, p.appearances / ta.Team_Appearances as appearance_ratio, p.goals / tg.Goals as goal_ratio
-FROM Player_Club_Stats p JOIN TEAM_APPEARANCES ta on p.club_common_name = ta.common_name JOIN TEAMS_GOALS tg on ta.common_name = tg.common_name JOIN Player pns 
-on p.player_id = pns.id
+FROM Player_Club_Stats p
+JOIN TEAM_APPEARANCES ta ON p.club_common_name = ta.common_name
+JOIN TEAMS_GOALS tg ON ta.common_name = tg.common_name
+JOIN Player pns ON p.player_id = pns.id
 WHERE p.appearances / ta.Team_Appearances >= ${appearance_ratio_min} AND p.appearances / ta.Team_Appearances <= ${appearance_ratio_max} 
 AND pns.height_cm <= ${height_max} 
 AND pns.height_cm >=${height_min} AND pns.age >= ${age_min} AND pns.age <= ${age_max} AND pns.wage_eur >= ${wage_min} AND pns.wage_eur <=${wage_max} AND 
-p.goals / tg.Goals >= ${goal_ratio_min} AND p.goals / tg.Goals <= ${goal_ratio_max} AND pns.nationality LIKE '%${nationality}%' 
-AND p.player_name LIKE '%${name}%' AND pns.league_name LIKE '%${league}%'
+p.goals / tg.Goals >= ${goal_ratio_min} AND p.goals / tg.Goals <= ${goal_ratio_max} 
+AND pns.nationality LIKE '%${nationality}%' AND p.player_name LIKE '%${name}%' AND pns.league_name LIKE '%${league}%' AND p.club_common_name LIKE '%${club_name}%'
     `, (err, data) => {
         if (err || data.length === 0) {
             console.log(err);
