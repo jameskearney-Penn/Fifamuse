@@ -1,72 +1,54 @@
-import { useEffect, useState } from 'react';
-import { Button, Checkbox, Container, FormControlLabel, Grid, Link, Slider, TextField } from '@mui/material';
+import { useState } from 'react';
+import { Button, Container, Grid, Slider, TextField } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
-
-import SongCard from '../components/SongCard';
-import { formatDuration } from '../helpers/formatter';
+import { NavLink } from 'react-router-dom';
 const config = require('../config.json');
 
 export default function PlayersPage() {
+  //Define state variables
   const [pageSize, setPageSize] = useState(10);
   const [data, setData] = useState([]);
-  const [selectedSongId, setSelectedSongId] = useState(null);
-
   const [currName, setCurrName] = useState('');
   const [value, setValue] = useState([25000, 129500000]);
   const [wage, setWage] = useState([500, 350000]);
-  const [overall, setOverall] = useState([47, 91]);
   const [height, setHeight] = useState([155, 203]);
   const [goal_ratio, setGoalRatio] = useState([0, 2.4]);
   const [age, setAge] = useState([16, 43]);
 
-  /*useEffect(() => {
-    fetch(`http://${config.server_host}:${config.server_port}/search_players`)
-      .then(res => res.json())
-      .then(resJson => {
-        const songsWithId = resJson.map((song) => ({ id: song.song_id, ...song }));
-        setData(songsWithId);
-      });
-  }, []);*/
-
+  //Call search players api
   const search = () => {
     fetch(`http://${config.server_host}:${config.server_port}/search_players?name=${currName}` +
     `&height_min=${height[0]}` + `&height_max=${height[1]}` + `&wage_min=${wage[0]}` + `&wage_max=${wage[1]}` +
     `&age_min=${age[0]}` + `&age_max=${age[1]}` + `&goal_ratio_min=${goal_ratio[0]}` + `&goal_ratio_max=${goal_ratio[1]}`
     ).then(res => res.json())
       .then(resJson => {
-        // DataGrid expects an array of objects with a unique id.
-        // To accomplish this, we use a map with spread syntax (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax)
         console.log(resJson);
-        if (resJson != {}) {
-          const songsWithId = resJson.map((player) => ({ id:  Math.random(), ...player }));
-          setData(songsWithId);
+        if (resJson.length && resJson.length != 0) {
+          const playersWithId = resJson.map((player) => ({ id:  Math.random(), ...player }));
+          setData(playersWithId);
         } else {
           setData({})
         }
       });
   }
 
-  // This defines the columns of the table of songs used by the DataGrid component.
-  // The format of the columns array and the DataGrid component itself is very similar to our
-  // LazyTable component. The big difference is we provide all data to the DataGrid component
-  // instead of loading only the data we need (which is necessary in order to be able to sort by column)
+  //Define columns
   const columns = [
-    { field: 'player_name', headerName: 'Name', width: 250},
-    { field: 'club_common_name', headerName: 'Club', width: 150},
+    { field: 'player_name', headerName: 'Name', width: 250,
+      renderCell: (params) => (
+        <NavLink style={{color: "#7ba8b5"}} to={`/player/${params.value}`}>{params.value}</NavLink>
+      )
+    },
+    { field: 'club_common_name', headerName: 'Club', width: 150,
+      renderCell: (params) => (
+        <NavLink style={{color: "#993153"}} to={`/club/${params.value}`}>{params.value}</NavLink>
+      ) 
+    },
     { field: 'goal_ratio', headerName: 'Goal Ratio', width: 150},
     { field: 'appearance_ratio', headerName: 'Appearance Ratio', width: 150},
   ]
-
-  // This component makes uses of the Grid component from MUI (https://mui.com/material-ui/react-grid/).
-  // The Grid component is super simple way to create a page layout. Simply make a <Grid container> tag
-  // (optionally has spacing prop that specifies the distance between grid items). Then, enclose whatever
-  // component you want in a <Grid item xs={}> tag where xs is a number between 1 and 12. Each row of the
-  // grid is 12 units wide and the xs attribute specifies how many units the grid item is. So if you want
-  // two grid items of the same size on the same row, define two grid items with xs={6}. The Grid container
-  // will automatically lay out all the grid items into rows based on their xs values.
   return (
     <Container>
-      {selectedSongId && <SongCard songId={selectedSongId} handleClose={() => setSelectedSongId(null)} />}
       <h2>Search Players</h2>
       <Grid container spacing={6}>
         <Grid item xs={8}>

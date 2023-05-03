@@ -6,8 +6,10 @@ import { createTheme } from "@mui/material/styles";
 import NavBar from './components/NavBar';
 import HomePage from './pages/HomePage';
 import PlayersPage from './pages/PlayersPage';
-import AlbumInfoPage from './pages/AlbumInfoPage'
 import ClubsPage from "./pages/ClubsPage";
+import PlayerInfoPage from "./pages/PlayerInfoPage";
+import ClubInfoPage from "./pages/ClubInfoPage";
+import CountriesPage from "./pages/CountriesPage";
 
 // createTheme enables you to customize the look and feel of your app past the default
 // in this case, we only change the color scheme
@@ -31,7 +33,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/clubs" element={<ClubsPage />} />
-          <Route path="/albums/:album_id" element={<AlbumInfoPage />} />
+          <Route path="/countries" element={<CountriesPage />} />
+          <Route path="/player/:name" element={<PlayerInfoPage />} />
+          <Route path="/club/:name" element={<ClubInfoPage />} />
           <Route path="/players" element={<PlayersPage />} />
         </Routes>
       </BrowserRouter>

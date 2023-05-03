@@ -62,9 +62,8 @@ const teams_of_week = async function(req, res) {
 const get_player = async function(req, res) {
     let name = req.params.name;
     console.log(name);
-
     connection.query(`
-    SELECT name, position, rating, value_eur, wage_eur, age, dob, height_cm, weight_kg, club_name, league_name, club_jersey_number, nationality, club_logo_url, nation_flag_url
+    SELECT name, position, rating, value_eur, wage_eur, age, dob, height_cm, weight_kg, club_name, league_name, club_jersey_number, nationality, player_face_url, club_logo_url, nation_flag_url
     FROM Player
     WHERE name LIKE '%${name}%'
     LIMIT 1
@@ -80,7 +79,6 @@ const get_player = async function(req, res) {
 
 const get_team = async function(req, res) {
     let name = req.params.name;
-
     connection.query(`
     SELECT c.common_name, cl.league_name, c.country, c.club_logo, c.club_flag, c.matches_played, c.wins, c.draws, 
     c.losses, c.goals_scored, c.goals_conceded, c.goal_difference, c.cards_total, c.shots, c.shots_on_target

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Divider, Link } from '@mui/material';
+import { Container, Divider } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 
 import LazyTable from '../components/LazyTable';
@@ -25,10 +25,16 @@ export default function HomePage() {
     {
       field: 'name',
       headerName: 'Name',
+      renderCell: (params) => (
+        <NavLink style={{color: "#7ba8b5"}} to={`/player/${params.name}`}>{params.name}</NavLink>
+      )
     },
     {
       field: 'club_name',
       headerName: 'Club',
+      renderCell: (params) => (
+        <NavLink style={{color: "#993153"}} to={`/club/${params.club_name}`}>{params.club_name}</NavLink>
+      )
     },
     {
       field: 'age',
@@ -44,6 +50,9 @@ export default function HomePage() {
     {
       field: 'club_name',
       headerName: 'Name',
+      renderCell: (params) => (
+        <NavLink style={{color: "#993153"}} to={`/club/${params.club_name}`}>{params.club_name}</NavLink>
+      )
     },
     {
       field: 'league_name',
@@ -54,9 +63,9 @@ export default function HomePage() {
   return (
     <Container>
       <div style={{width: "100%", alignContent: "center", justifyContent: "center"}}><h1 style={{alignSelf: "center", paddingLeft: "35%"}}>Welcome to FifaMuse!</h1></div>
-      <h2>Check out the player of the day:
-        <h5>{playerOfTheDay.name}</h5>
-        <h5>{playerOfTheDay.club_name}</h5>
+      <h2>Random Player of the Day:
+        <h5><NavLink style={{color: "#db2360"}} to={`/player/${playerOfTheDay.name}`}>{playerOfTheDay.name}</NavLink></h5>
+        <h5><NavLink style={{color: "#db2360"}} to={`/club/${playerOfTheDay.club_name}`}>{playerOfTheDay.club_name}</NavLink></h5>
       </h2>
       <Divider />
       <h2>Spotlight Players Of The Week</h2>
